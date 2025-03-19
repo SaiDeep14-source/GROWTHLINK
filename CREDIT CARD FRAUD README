@@ -1,0 +1,49 @@
+import pandas as pd
+import numpy as np
+import seaborn as sns
+import matplotlib.pyplot as plt
+from sklearn.model_selection import train_test_split
+from sklearn.preprocessing import StandardScaler
+from sklearn.ensemble import RandomForestClassifier
+from sklearn.metrics import accuracy_score, classification_report, confusion_matrix
+from imblearn.over_sampling import SMOTE
+
+# Load dataset
+data_url = "https://www.kaggle.com/datasets/mlg-ulb/creditcardfraud"
+df = pd.read_csv("creditcard.csv")  # Replace with actual file path
+
+# Data Exploration
+print(df.head())
+print(df.info())
+print(df.isnull().sum())  # Check for missing values
+
+# Check class distribution
+print("Class distribution:\n", df['Class'].value_counts())
+
+# Define features and target
+X = df.drop(columns=['Class'])
+y = df['Class']
+
+# Handle class imbalance using SMOTE
+smote = SMOTE(sampling_strategy=0.5, random_state=42)
+X_resampled, y_resampled = smote.fit_resample(X, y)
+
+# Split data into train and test sets
+X_train, X_test, y_train, y_test = train_test_split(X_resampled, y_resampled, test_size=0.2, random_state=42)
+
+# Normalize numerical features
+scaler = StandardScaler()
+X_train = scaler.fit_transform(X_train)
+X_test = scaler.transform(X_test)
+
+# Train model
+model = RandomForestClassifier(n_estimators=200, random_state=42, max_depth=10, min_samples_split=5)
+model.fit(X_train, y_train)
+
+# Predictions
+y_pred = model.predict(X_test)
+
+# Evaluation
+print("Accuracy:", accuracy_score(y_test, y_pred))
+print("Classification Report:\n", classification_report(y_test, y_pred))
+print("Confusion Matrix:\n", confusion_matrix(y_test, y_pred))
