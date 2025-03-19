@@ -1,0 +1,51 @@
+import pandas as pd
+import numpy as np
+import seaborn as sns
+import matplotlib.pyplot as plt
+from sklearn.model_selection import train_test_split
+from sklearn.preprocessing import StandardScaler, LabelEncoder
+from sklearn.ensemble import RandomForestClassifier
+from sklearn.metrics import accuracy_score, classification_report, confusion_matrix
+
+# Load dataset
+data_url = "https://www.kaggle.com/datasets/brendan45774/test-file"
+df = pd.read_csv("titanic.csv")  # Replace with actual file path
+
+# Data Exploration
+print(df.head())
+print(df.info())
+print(df.isnull().sum())  # Check for missing values
+
+# Handle missing values
+df['Age'].fillna(df['Age'].median(), inplace=True)
+df['Embarked'].fillna(df['Embarked'].mode()[0], inplace=True)
+df.drop(columns=['Cabin', 'Name', 'Ticket'], inplace=True)  # Drop columns with too many missing values or less importance
+
+# Encode categorical variables
+label_enc = LabelEncoder()
+df['Sex'] = label_enc.fit_transform(df['Sex'])
+df['Embarked'] = label_enc.fit_transform(df['Embarked'])
+
+# Define features and target
+X = df.drop(columns=['Survived'])
+y = df['Survived']
+
+# Split data into train and test sets
+X_train, X_test, y_train, y_test = train_test_split(X, y, test_size=0.2, random_state=42)
+
+# Normalize numerical features
+scaler = StandardScaler()
+X_train[['Age', 'Fare']] = scaler.fit_transform(X_train[['Age', 'Fare']])
+X_test[['Age', 'Fare']] = scaler.transform(X_test[['Age', 'Fare']])
+
+# Train model
+model = RandomForestClassifier(n_estimators=200, random_state=42, max_depth=10, min_samples_split=5)
+model.fit(X_train, y_train)
+
+# Predictions
+y_pred = model.predict(X_test)
+
+# Evaluation
+print("Accuracy:", accuracy_score(y_test, y_pred))
+print("Classification Report:\n", classification_report(y_test, y_pred))
+print("Confusion Matrix:\n", confusion_matrix(y_test, y_pred))
