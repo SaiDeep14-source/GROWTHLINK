@@ -1,47 +1,47 @@
 # GROWTHLINK
-# Titanic Survival Prediction
+import pandas as pd
+import numpy as np
+import seaborn as sns
+import matplotlib.pyplot as plt
+from sklearn.model_selection import train_test_split
+from sklearn.preprocessing import StandardScaler, LabelEncoder
+from sklearn.ensemble import RandomForestClassifier
+from sklearn.metrics import accuracy_score, classification_report, confusion_matrix
 
-## Objective
-This project predicts whether a passenger survived the Titanic disaster using machine learning. It involves data preprocessing, feature engineering, and model training.
+# Load dataset
+data_url = "https://www.kaggle.com/datasets/arshid/iris-flower-dataset"
+df = pd.read_csv("iris.csv")  # Replace with actual file path
 
-## Dataset
-The dataset contains information such as passenger age, gender, ticket class, fare, and more. You can download it from Kaggle: [Titanic Dataset](https://www.kaggle.com/datasets/brendan45774/test-file)
+# Data Exploration
+print(df.head())
+print(df.info())
+print(df.isnull().sum())  # Check for missing values
 
-## Installation
-To run this project, install the required dependencies:
+# Encode categorical variables
+label_enc = LabelEncoder()
+df['species'] = label_enc.fit_transform(df['species'])
 
-```bash
-pip install pandas numpy seaborn scikit-learn matplotlib
-```
+# Define features and target
+X = df.drop(columns=['species'])
+y = df['species']
 
-## Steps to Run the Project
-1. **Download the Dataset** – Save it as `titanic.csv` in your working directory.
-2. **Run the Python Script** – Execute the provided script to train the model:
+# Split data into train and test sets
+X_train, X_test, y_train, y_test = train_test_split(X, y, test_size=0.2, random_state=42)
 
-```bash
-python titanic_survival.py
-```
+# Normalize numerical features
+scaler = StandardScaler()
+X_train = scaler.fit_transform(X_train)
+X_test = scaler.transform(X_test)
 
-3. **Review Model Performance** – Check accuracy, classification report, and confusion matrix.
+# Train model
+model = RandomForestClassifier(n_estimators=100, random_state=42)
+model.fit(X_train, y_train)
 
-## Features Used
-- `Pclass`: Ticket class (1st, 2nd, 3rd)
-- `Sex`: Gender (Encoded)
-- `Age`: Passenger age (Missing values filled with median)
-- `Fare`: Ticket fare (Scaled)
-- `Embarked`: Port of embarkation (Encoded)
+# Predictions
+y_pred = model.predict(X_test)
 
-## Model & Evaluation
-- **Algorithm:** Random Forest Classifier
-- **Metrics:** Accuracy, Precision, Recall, Confusion Matrix
-
-## Results
-- The model provides a reliable classification of passengers who survived.
-- Further improvements can be made using hyperparameter tuning.
-
-## Contributing
-Feel free to fork this repository and improve the model with better preprocessing or feature engineering.
-
-## Contact
-For queries, reach out to **help.growthlink@gmail.com**
+# Evaluation
+print("Accuracy:", accuracy_score(y_test, y_pred))
+print("Classification Report:\n", classification_report(y_test, y_pred))
+print("Confusion Matrix:\n", confusion_matrix(y_test, y_pred))
 
